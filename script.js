@@ -102,9 +102,9 @@ async function getSharedScramjet() {
     sharedScramjet = new ScramjetController({
         prefix: getBasePath() + "scramjet/",
         files: {
-            wasm: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.wasm.wasm",
-            all: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.all.js",
-            sync: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.sync.js"
+            wasm: "scram/scramjet.wasm.wasm",
+            all: "scram/scramjet.all.js",
+            sync: "scram/scramjet.sync.js"
         }
     });
     
@@ -127,7 +127,7 @@ async function getSharedConnection() {
     sharedConnection = new BareMux.BareMuxConnection(getBasePath() + "bareworker.js");
     
     await sharedConnection.setTransport(
-        "https://cdn.jsdelivr.net/gh/Sea-Math/sail@main/libcurl/index.mjs",
+        "libcurl/index.mjs",
         [{ wisp: wispUrl }]
     );
     sharedConnectionReady = true;
