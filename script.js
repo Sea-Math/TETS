@@ -488,7 +488,7 @@ function toggleDevTools() {
     if (!win) return;
     if (win.eruda) { win.eruda.show(); return; }
     const script = win.document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/eruda";
+    script.src = "./vendor/eruda.js";
     script.onload = () => { win.eruda.init(); win.eruda.show(); };
     win.document.body.appendChild(script);
 }

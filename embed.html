@@ -104,7 +104,7 @@
             const wispUrl = localStorage.getItem("proxServer") || DEFAULT_WISP;
 
             connectionInstance = new BareMux.BareMuxConnection(basePath + "bareworker.js");
-            await connectionInstance.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-transport@2.1.28/dist/index.mjs", [{ wisp: wispUrl }]);
+            await connectionInstance.setTransport("./libcurl/index.mjs", [{ wisp: wispUrl }]);
             return connectionInstance;
         }
 
