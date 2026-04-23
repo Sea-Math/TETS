@@ -124,12 +124,18 @@ async function getSharedScramjet() {
 async function getSharedConnection() {
     if (sharedConnectionReady) return sharedConnection;
     const wispUrl = storageGetItem("proxServer") ?? DEFAULT_WISP;
-    sharedConnection = new BareMux.BareMuxConnection(getBasePath() + "bareworker.js");
-    
-    await sharedConnection.setTransport(
-        "./libcurl/index.mjs",
-        [{ wisp: wispUrl }]
-    );
+
+    try {
+        sharedConnection = new BareMux.BareMuxConnection(getBasePath() + "bareworker.js");
+        await sharedConnection.setTransport("./libcurl/index.mjs", [{ wisp: wispUrl }]);
+    } catch (err) {
+        console.warn("BareMux transport init failed, using fetch fallback:", err);
+        sharedConnection = {
+            async fetch(url, options) { return fetch(url, options); },
+            connect() { throw new Error("WebSocket proxy transport unavailable"); }
+        };
+    }
+
     sharedConnectionReady = true;
     return sharedConnection;
 }

@@ -103,8 +103,16 @@
             const basePath = location.pathname.replace(/[^/]*$/, '') + '/';
             const wispUrl = localStorage.getItem("proxServer") || DEFAULT_WISP;
 
-            connectionInstance = new BareMux.BareMuxConnection(basePath + "bareworker.js");
-            await connectionInstance.setTransport("./libcurl/index.mjs", [{ wisp: wispUrl }]);
+            try {
+                connectionInstance = new BareMux.BareMuxConnection(basePath + "bareworker.js");
+                await connectionInstance.setTransport("./libcurl/index.mjs", [{ wisp: wispUrl }]);
+            } catch (err) {
+                console.warn("Embed BareMux transport init failed, using fetch fallback:", err);
+                connectionInstance = {
+                    async fetch(url, options) { return fetch(url, options); },
+                    connect() { throw new Error("WebSocket proxy transport unavailable"); }
+                };
+            }
             return connectionInstance;
         }
 

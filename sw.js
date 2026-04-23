@@ -263,9 +263,17 @@ scramjet.addEventListener("request", async (e) => {
         }
 
         if (!scramjet.client) {
-            const connection = new BareMux.BareMuxConnection(basePath + "bareworker.js");
-            await connection.setTransport("./libcurl/index.mjs", [{ wisp: wispConfig.wispurl }]);
-            scramjet.client = connection;
+            try {
+                const connection = new BareMux.BareMuxConnection(basePath + "bareworker.js");
+                await connection.setTransport("./libcurl/index.mjs", [{ wisp: wispConfig.wispurl }]);
+                scramjet.client = connection;
+            } catch (err) {
+                console.warn("SW BareMux transport init failed, using fetch fallback:", err);
+                scramjet.client = {
+                    async fetch(url, options) { return fetch(url, options); },
+                    connect() { throw new Error("WebSocket proxy transport unavailable"); }
+                };
+            }
         }
 
         const MAX_RETRIES = 2;
