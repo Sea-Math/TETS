@@ -102,9 +102,9 @@ async function getSharedScramjet() {
     sharedScramjet = new ScramjetController({
         prefix: getBasePath() + "scramjet/",
         files: {
-            wasm: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.wasm.wasm",
-            all: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.all.js",
-            sync: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.sync.js"
+            wasm: "./scram/scramjet.wasm.wasm",
+            all: "./scram/scramjet.all.js",
+            sync: "./scram/scramjet.sync.js"
         }
     });
     
@@ -124,12 +124,18 @@ async function getSharedScramjet() {
 async function getSharedConnection() {
     if (sharedConnectionReady) return sharedConnection;
     const wispUrl = storageGetItem("proxServer") ?? DEFAULT_WISP;
-    sharedConnection = new BareMux.BareMuxConnection(getBasePath() + "bareworker.js");
-    
-    await sharedConnection.setTransport(
-        "https://cdn.jsdelivr.net/gh/Sea-Math/sail@main/libcurl/index.mjs",
-        [{ wisp: wispUrl }]
-    );
+
+    try {
+        sharedConnection = new BareMux.BareMuxConnection(getBasePath() + "bareworker.js");
+        await sharedConnection.setTransport("./libcurl/index.mjs", [{ wisp: wispUrl }]);
+    } catch (err) {
+        console.warn("BareMux transport init failed, using fetch fallback:", err);
+        sharedConnection = {
+            async fetch(url, options) { return fetch(url, options); },
+            connect() { throw new Error("WebSocket proxy transport unavailable"); }
+        };
+    }
+
     sharedConnectionReady = true;
     return sharedConnection;
 }
@@ -488,7 +494,7 @@ function toggleDevTools() {
     if (!win) return;
     if (win.eruda) { win.eruda.show(); return; }
     const script = win.document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/eruda";
+    script.src = "./vendor/eruda.js";
     script.onload = () => { win.eruda.init(); win.eruda.show(); };
     win.document.body.appendChild(script);
 }

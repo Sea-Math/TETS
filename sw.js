@@ -73,13 +73,13 @@ self.basePath = self.basePath || basePath;
 
 self.$scramjet = {
     files: {
-        wasm: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.wasm.wasm",
-        sync: "https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.sync.js",
+        wasm: "./scram/scramjet.wasm.wasm",
+        sync: "./scram/scramjet.sync.js",
     }
 };
 
-importScripts("https://cdn.jsdelivr.net/gh/Destroyed12121/Staticsj@main/JS/scramjet.all.js");
-importScripts("https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux/dist/index.js");
+importScripts("./scram/scramjet.all.js");
+importScripts("./baremux/index.js");
 
 const { ScramjetServiceWorker } = $scramjetLoadWorker();
 const scramjet = new ScramjetServiceWorker({
@@ -263,9 +263,17 @@ scramjet.addEventListener("request", async (e) => {
         }
 
         if (!scramjet.client) {
-            const connection = new BareMux.BareMuxConnection(basePath + "bareworker.js");
-            await connection.setTransport("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-transport@2.1.28/dist/index.mjs", [{ wisp: wispConfig.wispurl }]);
-            scramjet.client = connection;
+            try {
+                const connection = new BareMux.BareMuxConnection(basePath + "bareworker.js");
+                await connection.setTransport("./libcurl/index.mjs", [{ wisp: wispConfig.wispurl }]);
+                scramjet.client = connection;
+            } catch (err) {
+                console.warn("SW BareMux transport init failed, using fetch fallback:", err);
+                scramjet.client = {
+                    async fetch(url, options) { return fetch(url, options); },
+                    connect() { throw new Error("WebSocket proxy transport unavailable"); }
+                };
+            }
         }
 
         const MAX_RETRIES = 2;
