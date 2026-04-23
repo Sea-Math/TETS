@@ -1,1 +1,1 @@
-A static scramjet implementation similar to /staticsj but now uses jsdelivr cdn's to significantly reduce the size of the codebase.
+A static scramjet implementation similar to /staticsj that now references local in-repo assets instead of jsDelivr/CDN-hosted bundles.
